@@ -45,25 +45,6 @@ class Timer:
 
     @classmethod
     def parse(cls, raw: str) -> "Timer":
-        def _get_quantity(
-            matches: Sequence[Sequence[str]],
-        ) -> Optional[Quantity]:
-            if not matches:
-                return None
-
-            match = matches[0]
-            amount_as_str = match[0]
-            if not amount_as_str:
-                return None
-            if "." in amount_as_str:
-                amount = float(amount_as_str)
-            elif "/" in amount_as_str:
-                amount = Fraction(amount_as_str)
-            else:
-                amount = int(amount_as_str)
-            unit = str(match[1]) if match[1] else None
-            return Quantity(amount, unit)
-
         name, raw_amount = re.findall(r"^~([^{]*)(?:{([^}]*)})?", raw)[0]
         matches = re.findall(r"([^%}]+)%?([\w]+)?", raw_amount)
         return Timer(name, _get_quantity(matches))
@@ -79,7 +60,6 @@ class Timer:
         )
 
 
-
 @dataclass
 class Ingredient:
     name: str
@@ -87,25 +67,6 @@ class Ingredient:
 
     @classmethod
     def parse(cls, raw: str) -> "Ingredient":
-        def _get_quantity(
-            matches: Sequence[Sequence[str]],
-        ) -> Optional[Quantity]:
-            if not matches:
-                return None
-
-            match = matches[0]
-            amount_as_str = match[0]
-            if not amount_as_str:
-                return None
-            if "." in amount_as_str:
-                amount = float(amount_as_str)
-            elif "/" in amount_as_str:
-                amount = Fraction(amount_as_str)
-            else:
-                amount = int(amount_as_str)
-            unit = str(match[1]) if match[1] else None
-            return Quantity(amount, unit)
-
         name, raw_amount = re.findall(r"^@([^{]+)(?:{([^}]*)})?", raw)[0]
         matches = re.findall(r"([^%}]+)%?([\w]+)?", raw_amount)
         return Ingredient(name, _get_quantity(matches))
@@ -243,3 +204,21 @@ class Recipe:
                 for raw_step in raw_steps
             ],
         )
+
+
+def _get_quantity(matches: Sequence[Sequence[str]]) -> Quantity:
+    if not matches:
+        return None
+
+    match = matches[0]
+    amount_as_str = match[0]
+    if not amount_as_str:
+        return None
+    if "." in amount_as_str:
+        amount = float(amount_as_str)
+    elif "/" in amount_as_str:
+        amount = Fraction(amount_as_str)
+    else:
+        amount = int(amount_as_str)
+    unit = str(match[1]) if match[1] else None
+    return Quantity(amount, unit)
