@@ -206,7 +206,7 @@ class Recipe:
         )
 
 
-def _get_quantity(matches: Sequence[Sequence[str]]) -> Quantity:
+def _get_quantity(matches: Sequence[Sequence[str]]) -> Optional[Quantity]:
     if not matches:
         return None
 

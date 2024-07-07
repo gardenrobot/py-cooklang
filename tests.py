@@ -212,6 +212,7 @@ class ParserTest(unittest.TestCase):
                 "~ Or this",
             ]
         )
+
     def test_cookware_extraction(self) -> None:
         recipe = Recipe.parse(
             cleandoc(
@@ -236,6 +237,7 @@ class ParserTest(unittest.TestCase):
                 "Place other things in the large bowl",
             ]
         )
+
     def test_timer_extraction(self) -> None:
         recipe = Recipe.parse(
             cleandoc(
