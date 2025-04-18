@@ -63,13 +63,16 @@ class Timer:
 @dataclass
 class Ingredient:
     name: str
+    location: Tuple[int, int, int]
     quantity: Optional[Quantity] = None
 
     @classmethod
-    def parse(cls, raw: str) -> "Ingredient":
+    def parse(cls, match: re.Match, step_index: int) -> "Ingredient":
+        location = (step_index, match.start(), match.end())
+        raw = match.group()
         name, raw_amount = re.findall(r"^@([^{]+)(?:{([^}]*)})?", raw)[0]
         matches = re.findall(r"([^%}]+)%?([\w]+)?", raw_amount)
-        return Ingredient(name, _get_quantity(matches))
+        return Ingredient(name, location, _get_quantity(matches))
 
     def __add__(self, other: "Ingredient") -> "Ingredient":
         if self.name != other.name:
@@ -78,6 +81,7 @@ class Ingredient:
             )
         return Ingredient(
             name=self.name,
+            location=self.location,
             quantity=Quantity.add_optional(self.quantity, other.quantity),
         )
 
@@ -103,19 +107,19 @@ class Recipe:
                 raw_paragraphs,
             )
         )
+        ingr_pat = re.compile("@(?:(?:[\w ]+?){[^}]*}|[\w]+)")
         ingredients = list(
             itertools.chain(
                 *map(
-                    lambda raw_step: list(
+                    lambda raw_step_enumeration: list(
                         map(
-                            lambda s: Ingredient.parse(s),
-                            re.findall(
-                                r"@(?:(?:[\w ]+?){[^}]*}|[\w]+)",
-                                raw_step,
+                            lambda raw_step: Ingredient.parse(
+                                raw_step, raw_step_enumeration[0]
                             ),
+                            ingr_pat.finditer(raw_step_enumeration[1]),
                         )
                     ),
-                    raw_steps,
+                    list(enumerate(raw_steps)),
                 )
             )
         )
