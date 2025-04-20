@@ -27,8 +27,8 @@ class ParserTest(unittest.TestCase):
         expect(recipe.metadata).to_equal({})
         expect(recipe.ingredients).to_equal(
             [
-                Ingredient("stuff"),
-                Ingredient("other things"),
+                Ingredient("stuff", (0, 6, 11)),
+                Ingredient("other things", (1, 6, 18)),
             ]
         )
         expect(recipe.steps).to_equal(
@@ -51,10 +51,10 @@ class ParserTest(unittest.TestCase):
         expect(recipe.metadata).to_equal({})
         expect(recipe.ingredients).to_equal(
             [
-                Ingredient("sugar", Quantity(42, "grams")),
-                Ingredient("green onions", Quantity(10, "grams")),
-                Ingredient("salt", Quantity(0.5, "grams")),
-                Ingredient("amaranth", Quantity(Fraction(1, 2), "cup")),
+                Ingredient("sugar", (0, 6, 11), Quantity(42, "grams")),
+                Ingredient("green onions", (0, 34, 46), Quantity(10, "grams")),
+                Ingredient("salt", (1, 4, 8), Quantity(0.5, "grams")),
+                Ingredient("amaranth", (1, 13, 21), Quantity(Fraction(1, 2), "cup")),
             ]
         )
         expect(recipe.steps).to_equal(
@@ -82,11 +82,11 @@ class ParserTest(unittest.TestCase):
         )
         expect(recipe.ingredients).to_equal(
             [
-                Ingredient("salt", Quantity(0.3, "grams")),
-                Ingredient("amaranth", Quantity(Fraction(3, 4), "cup")),
-                Ingredient("butter", Quantity(3, "cup")),
-                Ingredient("olive oil"),
-                Ingredient("garlic", Quantity(1)),
+                Ingredient("salt", (0, 4, 8), Quantity(0.3, "grams")),
+                Ingredient("amaranth", (1, 4, 12), Quantity(Fraction(3, 4), "cup")),
+                Ingredient("butter", (2, 4, 10), Quantity(3, "cup")),
+                Ingredient("olive oil", (3, 10, 19)),
+                Ingredient("garlic", (4, 4, 10), Quantity(1)),
             ]
         )
 
@@ -105,11 +105,11 @@ class ParserTest(unittest.TestCase):
         expect(recipe.metadata).to_equal({})
         expect(recipe.ingredients).to_equal(
             [
-                Ingredient("green olives", Quantity(5, "units")),
-                Ingredient("salt", Quantity(2, "grams")),
-                Ingredient("green onions"),
-                Ingredient("pepper"),
-                Ingredient("sauté vegetables"),
+                Ingredient("green olives", (0, 4, 16), Quantity(5, "units")),
+                Ingredient("salt", (0, 48, 52), Quantity(2, "grams")),
+                Ingredient("green onions", (0, 57, 69)),
+                Ingredient("pepper", (1, 21, 27)),
+                Ingredient("sauté vegetables", (2, 8, 24)),
             ]
         )
         expect(recipe.steps).to_equal(
@@ -182,7 +182,7 @@ class ParserTest(unittest.TestCase):
         expect(recipe.metadata).to_equal({})
         expect(recipe.ingredients).to_equal(
             [
-                Ingredient("pasta"),
+                Ingredient("pasta", (0, 9, 14)),
             ]
         )
         expect(recipe.steps).to_equal(
@@ -261,6 +261,22 @@ class ParserTest(unittest.TestCase):
             [
                 "Cook in oven for 30 minutes",
                 "Let cool for 1 hour",
+            ]
+        )
+
+    def test_ingredient_name_overlap(self) -> None:
+        recipe = Recipe.parse(
+            cleandoc(
+                """
+            Mix @cayenne pepper{}, @cumin, and @pepper{}
+        """
+            )
+        )
+        expect(recipe.ingredients).to_equal(
+            [
+                Ingredient("cayenne pepper", (0, 4, 18)),
+                Ingredient("cumin", (0, 20, 25)),
+                Ingredient("pepper", (0, 31, 37)),
             ]
         )
 
