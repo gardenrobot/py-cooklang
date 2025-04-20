@@ -264,6 +264,22 @@ class ParserTest(unittest.TestCase):
             ]
         )
 
+    def test_ingredient_name_overlap(self) -> None:
+        recipe = Recipe.parse(
+            cleandoc(
+                """
+            Mix @cayenne pepper{}, @cumin, and @pepper{}
+        """
+            )
+        )
+        expect(recipe.ingredients).to_equal(
+            [
+                Ingredient("cayenne pepper", (0, 4, 18)),
+                Ingredient("cumin", (0, 20, 25)),
+                Ingredient("pepper", (0, 31, 37)),
+            ]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

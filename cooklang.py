@@ -67,13 +67,32 @@ class Ingredient:
     quantity: Optional[Quantity] = None
 
     @classmethod
-    def parse(cls, match: re.Match, step_index: int, steps: List[str]) -> "Ingredient":
+    def parse(
+        cls,
+        match: re.Match,
+        step_index: int,
+        steps: List[str],
+        current_ingredients: List,
+    ) -> "Ingredient":
         raw = match.group()
         name, raw_amount = re.findall(r"^@([^{]+)(?:{([^}]*)})?", raw)[0]
         matches = re.findall(r"([^%}]+)%?([\w]+)?", raw_amount)
 
-        location_match = re.search(name, steps[step_index])
-        location = (step_index, location_match.start(), location_match.end())
+        # get the location of the ingredient in the step str. we do this by searching the current step, but only after the end of the last ingredient's location.
+        ingredients_on_current_step = [
+            i for i in current_ingredients if i.location[0] == step_index
+        ]
+        last_ingr_index = (
+            ingredients_on_current_step[-1].location[2]
+            if len(ingredients_on_current_step) > 0
+            else 0
+        )
+        location_match = re.search(name, steps[step_index][last_ingr_index:])
+        location = (
+            step_index,
+            location_match.start() + last_ingr_index,
+            location_match.end() + last_ingr_index,
+        )
 
         return Ingredient(name, location, _get_quantity(matches))
 
@@ -124,21 +143,13 @@ class Recipe:
         ]
 
         ingr_pat = re.compile("@(?:(?:[\w ]+?){[^}]*}|[\w]+)")
-        ingredients = list(
-            itertools.chain(
-                *map(
-                    lambda raw_step_enumeration: list(
-                        map(
-                            lambda raw_step: Ingredient.parse(
-                                raw_step, raw_step_enumeration[0], steps
-                            ),
-                            ingr_pat.finditer(raw_step_enumeration[1]),
-                        )
-                    ),
-                    list(enumerate(raw_steps)),
+        ingredients = []
+        for raw_step_index, raw_step in enumerate(raw_steps):
+            for ingr_match in ingr_pat.finditer(raw_step):
+                ingredients.append(
+                    Ingredient.parse(ingr_match, raw_step_index, steps, ingredients)
                 )
-            )
-        )
+
         cookware = list(
             itertools.chain(
                 *map(
