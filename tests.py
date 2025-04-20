@@ -27,8 +27,8 @@ class ParserTest(unittest.TestCase):
         expect(recipe.metadata).to_equal({})
         expect(recipe.ingredients).to_equal(
             [
-                Ingredient("stuff", (0, 6, 12)),
-                Ingredient("other things", (1, 6, 21)),
+                Ingredient("stuff", (0, 6, 11)),
+                Ingredient("other things", (1, 6, 18)),
             ]
         )
         expect(recipe.steps).to_equal(
@@ -51,10 +51,10 @@ class ParserTest(unittest.TestCase):
         expect(recipe.metadata).to_equal({})
         expect(recipe.ingredients).to_equal(
             [
-                Ingredient("sugar", (0, 6, 22), Quantity(42, "grams")),
-                Ingredient("green onions", (0, 45, 68), Quantity(10, "grams")),
-                Ingredient("salt", (1, 4, 20), Quantity(0.5, "grams")),
-                Ingredient("amaranth", (1, 25, 43), Quantity(Fraction(1, 2), "cup")),
+                Ingredient("sugar", (0, 6, 11), Quantity(42, "grams")),
+                Ingredient("green onions", (0, 34, 46), Quantity(10, "grams")),
+                Ingredient("salt", (1, 4, 8), Quantity(0.5, "grams")),
+                Ingredient("amaranth", (1, 13, 21), Quantity(Fraction(1, 2), "cup")),
             ]
         )
         expect(recipe.steps).to_equal(
@@ -82,11 +82,11 @@ class ParserTest(unittest.TestCase):
         )
         expect(recipe.ingredients).to_equal(
             [
-                Ingredient("salt", (0, 4, 20), Quantity(0.3, "grams")),
-                Ingredient("amaranth", (1, 4, 22), Quantity(Fraction(3, 4), "cup")),
-                Ingredient("butter", (2, 4, 18), Quantity(3, "cup")),
-                Ingredient("olive oil", (3, 10, 22)),
-                Ingredient("garlic", (4, 4, 14), Quantity(1)),
+                Ingredient("salt", (0, 4, 8), Quantity(0.3, "grams")),
+                Ingredient("amaranth", (1, 4, 12), Quantity(Fraction(3, 4), "cup")),
+                Ingredient("butter", (2, 4, 10), Quantity(3, "cup")),
+                Ingredient("olive oil", (3, 10, 19)),
+                Ingredient("garlic", (4, 4, 10), Quantity(1)),
             ]
         )
 
@@ -105,11 +105,11 @@ class ParserTest(unittest.TestCase):
         expect(recipe.metadata).to_equal({})
         expect(recipe.ingredients).to_equal(
             [
-                Ingredient("green olives", (0, 4, 26), Quantity(5, "units")),
-                Ingredient("salt", (0, 61, 75), Quantity(2, "grams")),
-                Ingredient("green onions", (0, 80, 95)),
-                Ingredient("pepper", (1, 22, 29)),
-                Ingredient("sauté vegetables", (2, 8, 27)),
+                Ingredient("green olives", (0, 4, 16), Quantity(5, "units")),
+                Ingredient("salt", (0, 48, 52), Quantity(2, "grams")),
+                Ingredient("green onions", (0, 57, 69)),
+                Ingredient("pepper", (1, 21, 27)),
+                Ingredient("sauté vegetables", (2, 8, 24)),
             ]
         )
         expect(recipe.steps).to_equal(
@@ -182,7 +182,7 @@ class ParserTest(unittest.TestCase):
         expect(recipe.metadata).to_equal({})
         expect(recipe.ingredients).to_equal(
             [
-                Ingredient("pasta", (0, 9, 15)),
+                Ingredient("pasta", (0, 9, 14)),
             ]
         )
         expect(recipe.steps).to_equal(

@@ -2,7 +2,7 @@ import itertools
 import re
 from dataclasses import dataclass
 from fractions import Fraction
-from typing import Mapping, Optional, Sequence, Tuple, Union
+from typing import Mapping, Optional, Sequence, Tuple, Union, List
 
 
 @dataclass
@@ -67,11 +67,14 @@ class Ingredient:
     quantity: Optional[Quantity] = None
 
     @classmethod
-    def parse(cls, match: re.Match, step_index: int) -> "Ingredient":
-        location = (step_index, match.start(), match.end())
+    def parse(cls, match: re.Match, step_index: int, steps: List[str]) -> "Ingredient":
         raw = match.group()
         name, raw_amount = re.findall(r"^@([^{]+)(?:{([^}]*)})?", raw)[0]
         matches = re.findall(r"([^%}]+)%?([\w]+)?", raw_amount)
+
+        location_match = re.search(name, steps[step_index])
+        location = (step_index, location_match.start(), location_match.end())
+
         return Ingredient(name, location, _get_quantity(matches))
 
     def __add__(self, other: "Ingredient") -> "Ingredient":
@@ -107,6 +110,19 @@ class Recipe:
                 raw_paragraphs,
             )
         )
+        steps = [
+            re.sub(
+                r"(?:@|#)(\w[\w ]*)({[^}]*})?",
+                r"\1",
+                re.sub(
+                    r"~[\w ]*\{([^}%]*)(?:%([^}]+))?}",
+                    r"\1 \2",
+                    raw_step,
+                ),
+            )
+            for raw_step in raw_steps
+        ]
+
         ingr_pat = re.compile("@(?:(?:[\w ]+?){[^}]*}|[\w]+)")
         ingredients = list(
             itertools.chain(
@@ -114,7 +130,7 @@ class Recipe:
                     lambda raw_step_enumeration: list(
                         map(
                             lambda raw_step: Ingredient.parse(
-                                raw_step, raw_step_enumeration[0]
+                                raw_step, raw_step_enumeration[0], steps
                             ),
                             ingr_pat.finditer(raw_step_enumeration[1]),
                         )
@@ -195,18 +211,7 @@ class Recipe:
             ingredients=ingredients,
             cookware=cookware,
             timers=timers,
-            steps=[
-                re.sub(
-                    r"(?:@|#)(\w[\w ]*)({[^}]*})?",
-                    r"\1",
-                    re.sub(
-                        r"~[\w ]*\{([^}%]*)(?:%([^}]+))?}",
-                        r"\1 \2",
-                        raw_step,
-                    ),
-                )
-                for raw_step in raw_steps
-            ],
+            steps=steps,
         )
 
 
